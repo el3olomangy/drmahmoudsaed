@@ -1,0 +1,27 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "users": { ".indexOn": ["phone", "parent_phone", "role", "grade", "created_at"] },
+    "courses": { ".indexOn": ["grade", "is_active", "created_at"] },
+    "units": { ".indexOn": ["course_id", "order"] },
+    "lectures": { ".indexOn": ["unit_id", "course_id", "order"] },
+    "exams": { ".indexOn": ["course_id", "lecture_id", "unit_id", "created_at"] },
+    "exam_results": { ".indexOn": ["exam_id", "student_id", "course_id", "submitted_at"] },
+    "exam_attempts": { ".indexOn": ["exam_id", "student_id", "status"] },
+    "homework_attempts": { ".indexOn": ["homework_id", "student_id", "status"] },
+    "center_stages": { ".indexOn": ["created_by"] },
+    "center_groups": { ".indexOn": ["stage_id"] },
+    "center_students": { ".indexOn": ["group_id", "stage_id", "qr_token"] },
+    "center_attendance": { ".indexOn": ["student_id", "group_id", "stage_id", "date"] },
+    "center_payments": { ".indexOn": ["student_id", "month"] },
+    "assignments": { ".indexOn": ["course_id", "lecture_id", "created_at"] },
+    "assignment_submissions": { ".indexOn": ["assignment_id", "student_id", "submitted_at"] },
+    "lecture_progress": { ".indexOn": ["user_id", "lecture_id", "course_id", "updated_at"] },
+    "codes": { ".indexOn": ["code", "status", "course_id", "created_at"] },
+    "notifications": { ".indexOn": ["target_user_id", "target_grade", "created_at", "is_read"] },
+    "activity_log": { ".indexOn": ["student_id", "created_at"] },
+    "token_blacklist": { ".indexOn": ["token", "expires_at"] },
+    "grade_images": { ".indexOn": ["grade"] }
+  }
+}

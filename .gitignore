@@ -1,0 +1,59 @@
+# ==============================================================
+#  .gitignore  —  drmahmoudsaed v5  (Next.js frontend + Python backend)
+#  ضعه في جذر المشروع بجانب مجلدي frontend و backend
+# ==============================================================
+
+# ---------- الأسرار والمتغيرات البيئية (لا ترفعها أبدًا) ----------
+.env
+.env.*
+!.env.example          # اسمح فقط بملف المثال
+*.local
+
+# ---------- Node / Next.js (frontend) ----------
+node_modules/
+.next/
+out/
+build/
+dist/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+.pnp
+.pnp.js
+.eslintcache
+
+# ---------- Python (backend) ----------
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---------- السجلات والكاش ----------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------- ملفات النظام والمحرر ----------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# ---------- ملفات مؤقتة/تصدير ----------
+structure.txt
+
+# ==============================================================
+#  ملاحظات:
+#  - package-lock.json يُرفع عادةً (اتركه، لا تتجاهله).
+#  - .env.example يُرفع ليعرف الآخرون المتغيرات المطلوبة.
+#  - firebase-database-rules.json و vercel.json تُرفع.
+# ==============================================================

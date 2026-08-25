@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "frontend/package.json", "use": "@vercel/next" },
+    { "src": "backend/app/main.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/api/v1/(.*)", "dest": "/backend/app/main.py" },
+    { "src": "/health", "dest": "/backend/app/main.py" },
+    { "src": "/(.*)", "dest": "/frontend/$1" }
+  ],
+  "crons": [
+    { "path": "/api/v1/cron/deadline-checks", "schedule": "*/5 * * * *" }
+  ]
+}

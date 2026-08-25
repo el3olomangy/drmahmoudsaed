@@ -1,0 +1,58 @@
+# ============================================================
+#  requirements.txt — El3olomangy backend (FastAPI + Firebase)
+#  اتنضّف من المكتبات التقيلة غير المستخدمة (selenium / pandas /
+#  numpy / openpyxl / trio / psycopg2 ...) عشان الحزمة تبقى أصغر
+#  وتعدّي حدود Vercel serverless بأمان وتبقى الكولد-ستارت أسرع.
+#  كل اللي فضل هنا مستخدَم فعليًا في الكود أو transitive dependency له.
+# ============================================================
+
+# --- إطار العمل والسيرفر ---
+fastapi==0.135.1
+starlette==0.52.1
+uvicorn==0.41.0
+h11==0.16.0
+click==8.3.1
+colorama==0.4.6
+anyio==4.12.1
+sniffio==1.3.1
+
+# --- Pydantic ---
+pydantic==2.12.5
+pydantic-settings==2.13.1
+pydantic_core==2.41.5
+annotated-types==0.7.0
+typing-inspection==0.4.2
+typing_extensions==4.15.0
+packaging==25.0
+python-dotenv==1.2.1
+
+# --- المصادقة والتشفير ---
+bcrypt==5.0.0
+python-jose==3.5.0
+ecdsa==0.19.1
+rsa==4.9.1
+pyasn1==0.6.2
+six==1.17.0
+cryptography==46.0.5
+cffi==2.0.0
+pycparser==2.23
+
+# --- رفع الملفات / الصور ---
+python-multipart==0.0.22
+pillow==12.0.0
+
+# --- طلبات HTTP لخدمات Bunny ---
+requests==2.32.5
+certifi==2025.10.5
+charset-normalizer==3.4.3
+idna==3.10
+urllib3==2.5.0
+
+# --- قاعدة البيانات (Firebase Realtime DB) ---
+firebase-admin==7.1.0
+
+# --- Rate limiting ---
+slowapi==0.1.9
+
+# --- إعدادات ---
+PyYAML==6.0.3

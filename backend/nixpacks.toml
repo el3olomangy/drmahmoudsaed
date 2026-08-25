@@ -1,0 +1,2 @@
+echo '[phases.install]' > nixpacks.toml
+echo 'cmds = ["pip install -r requirements.txt"]' >> nixpacks.toml
