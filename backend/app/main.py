@@ -1,3 +1,6 @@
+import os
+os.environ.setdefault("PYTHONUNBUFFERED", "1")
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager

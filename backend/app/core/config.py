@@ -44,4 +44,10 @@ class Settings(BaseSettings):
     @property
     def bunny_stream_configured(self) -> bool:
         return bool(self.BUNNY_STREAM_LIBRARY_ID and self.BUNNY_STREAM_API_KEY)
-settings=Settings()
+try:
+    settings = Settings()
+except Exception as e:
+    import traceback
+    print("=== SETTINGS ERROR ===")
+    traceback.print_exc()
+    raise
