@@ -263,7 +263,7 @@ export default function DailyAttendancePage() {
         <div className="space-y-3">
           {list.map((s) => (
             <Card key={s.student_id}>
-              <CardContent className="p-4 flex items-center justify-between gap-3">
+              <CardContent className="p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-bold truncate">{s.name}</p>
@@ -284,11 +284,11 @@ export default function DailyAttendancePage() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 shrink-0 w-full sm:w-auto">
                   {tab === "absent" && (
                     <a
                       href={`tel:${s.parent_phone}`}
-                      className="p-2 rounded-md hover:bg-muted text-muted-foreground"
+                      className="p-2 rounded-md hover:bg-muted text-muted-foreground shrink-0"
                       title="اتصل بولي الأمر"
                     >
                       <Phone className="w-4 h-4" />
@@ -298,7 +298,7 @@ export default function DailyAttendancePage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="gap-1 text-destructive hover:text-destructive"
+                      className="gap-1 flex-1 sm:flex-none text-destructive hover:text-destructive"
                       onClick={() => markAbsent(s.student_id)}
                       disabled={actingId === s.student_id}
                     >
@@ -308,7 +308,7 @@ export default function DailyAttendancePage() {
                   ) : (
                     <Button
                       size="sm"
-                      className="gap-1 bg-green-600 hover:bg-green-700 text-white"
+                      className="gap-1 flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white"
                       onClick={() => markPresent(s.student_id)}
                       disabled={actingId === s.student_id}
                     >

@@ -150,18 +150,19 @@ export default function AssistantsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold text-foreground">المساعدون</h1>
           <p className="text-muted-foreground mt-1">
             {isLoading ? "..." : `${assistants.length} مساعد`}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button
             variant="outline"
             onClick={fetchAssistants}
             disabled={isLoading}
+            className="flex-1 sm:flex-none"
           >
             <RefreshCw
               className={`w-4 h-4 ml-2 ${isLoading ? "animate-spin text-loading" : "text-muted-foreground"}`}
@@ -187,7 +188,7 @@ export default function AssistantsPage() {
             }}
           >
             <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground flex-1 sm:flex-none">
                 <Plus className="w-4 h-4 ml-2" />
                 مساعد جديد
               </Button>
@@ -336,32 +337,32 @@ export default function AssistantsPage() {
               {assistants.map((assistant) => (
                 <div
                   key={assistant.id}
-                  className="flex items-center justify-between py-4 gap-4"
+                  className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                 >
                   {/* Avatar + Info */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                       <span className="text-primary font-bold text-sm">
                         {assistant.first_name?.[0]}
                         {assistant.last_name?.[0]}
                       </span>
                     </div>
-                    <div>
-                      <p className="font-bold text-foreground">
+                    <div className="min-w-0">
+                      <p className="font-bold text-foreground truncate">
                         {assistant.first_name} {assistant.last_name}
                       </p>
-                      <p className="text-sm text-muted-foreground" dir="ltr">
+                      <p className="text-sm text-muted-foreground truncate" dir="ltr">
                         {assistant.phone}
                       </p>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                      className="flex-1 sm:flex-none border-blue-300 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
                       onClick={() => {
                         setResetDialog({
                           id: assistant.id,
@@ -378,6 +379,7 @@ export default function AssistantsPage() {
                     <Button
                       size="sm"
                       variant="destructive"
+                      className="flex-1 sm:flex-none"
                       disabled={deletingId === assistant.id}
                       onClick={() =>
                         handleDelete(
