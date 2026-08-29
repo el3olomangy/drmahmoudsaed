@@ -174,25 +174,25 @@ export default function CenterPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* رأس الصفحة */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <QrCode className="w-6 h-6 text-primary" />
           <h1 className="text-2xl font-bold">السنتر</h1>
         </div>
-        <div className="flex items-center gap-2">
-          <Button asChild variant="outline" className="gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+          <Button asChild variant="outline" className="gap-2 w-full sm:w-auto">
             <Link href="/dashboard/admin/center/scan">
               <Camera className="w-4 h-4" />
               اسكان الحضور
             </Link>
           </Button>
-          <Button asChild variant="outline" className="gap-2">
+          <Button asChild variant="outline" className="gap-2 w-full sm:w-auto">
             <Link href="/dashboard/admin/center/attendance">
               <CalendarCheck className="w-4 h-4" />
               الحضور اليومي
             </Link>
           </Button>
-          <Button asChild variant="outline" className="gap-2">
+          <Button asChild variant="outline" className="gap-2 w-full sm:w-auto">
             <Link href="/dashboard/admin/center/reports">
               <BarChart3 className="w-4 h-4" />
               التقارير
@@ -203,7 +203,7 @@ export default function CenterPage() {
               setDialogError("");
               setStageDialog({ open: true, name: "" });
             }}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             <Plus className="w-4 h-4" />
             مرحلة جديدة
