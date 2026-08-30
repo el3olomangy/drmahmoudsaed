@@ -11,7 +11,10 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
-    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    # ملاحظة: النوع str (مش List) عن قصد — عشان pydantic-settings مايحاولش يقراها
+    # كـ JSON من متغير البيئة (ده كان بيكسر التطبيق كله لو القيمة مش JSON صالح).
+    # بنقبل هنا JSON array أو نص مفصول بفواصل، والتحويل لقائمة في cors_origins.
+    ALLOWED_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     # ====== المهام المجدولة (تسليم تلقائي للامتحانات/الواجبات المنتهية + إشعارات) ======
     # على استضافة دائمة (Railway/Render/VPS) سيبها True — الـ loop الخلفي بيشتغل عادي.
@@ -36,6 +39,24 @@ class Settings(BaseSettings):
     BUNNY_STREAM_WEBHOOK_SECRET: Optional[str] = None
 
     class Config: env_file = ".env"
+
+    @property
+    def cors_origins(self) -> List[str]:
+        """بترجّع نطاقات الـ CORS كقائمة — تقبل JSON array أو نص مفصول بفواصل."""
+        raw = (self.ALLOWED_ORIGINS or "").strip()
+        if not raw:
+            return ["http://localhost:3000", "http://127.0.0.1:3000"]
+        if raw.startswith("["):
+            try:
+                import json
+                val = json.loads(raw)
+                if isinstance(val, list):
+                    items = [str(x).strip() for x in val if str(x).strip()]
+                    if items:
+                        return items
+            except Exception:
+                pass
+        return [o.strip() for o in raw.split(",") if o.strip()]
 
     @property
     def bunny_storage_configured(self) -> bool:

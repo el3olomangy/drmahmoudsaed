@@ -52,7 +52,7 @@ async def _rate_limit_handler(request: _FRequest, exc: RateLimitExceeded):
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_handler)
 
-ALLOWED_ORIGINS = settings.ALLOWED_ORIGINS
+ALLOWED_ORIGINS = settings.cors_origins
 
 app.add_middleware(
     CORSMiddleware,
