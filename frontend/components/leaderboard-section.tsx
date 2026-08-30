@@ -49,12 +49,21 @@ export function LeaderboardSection() {
 
   useEffect(() => {
     let alive = true
-    setLoading(true)
-    gamificationAPI
-      .getLeaderboard({ grade: grade || undefined, limit: 10 })
-      .then((d: any) => alive && setStudents(d?.students || []))
-      .catch(() => alive && setStudents([]))
-      .finally(() => alive && setLoading(false))
+    const run = async () => {
+      setLoading(true)
+      try {
+        const d: any = await gamificationAPI.getLeaderboard({
+          grade: grade || undefined,
+          limit: 10,
+        })
+        if (alive) setStudents(d?.students || [])
+      } catch {
+        if (alive) setStudents([])
+      } finally {
+        if (alive) setLoading(false)
+      }
+    }
+    run()
     return () => {
       alive = false
     }
@@ -125,7 +134,7 @@ export function LeaderboardSection() {
                     {s.avatar_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={getImageUrl(s.avatar_url)}
+                        src={getImageUrl(s.avatar_url) || undefined}
                         alt={s.name}
                         className="w-full h-full object-cover"
                       />
