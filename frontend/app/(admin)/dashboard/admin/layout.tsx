@@ -25,6 +25,7 @@ import {
   UserCog,
   ImageIcon,
   QrCode,
+  Trophy,
 } from "lucide-react";
 
 const menuItems = [
@@ -39,6 +40,12 @@ const menuItems = [
     href: "/dashboard/admin/students",
     label: "الطلاب",
     icon: Users,
+    roles: ["teacher", "assistant"],
+  },
+  {
+    href: "/dashboard/admin/leaderboard",
+    label: "ترتيب الطلاب",
+    icon: Trophy,
     roles: ["teacher", "assistant"],
   },
   {

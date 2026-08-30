@@ -22,7 +22,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { BookOpen, Plus, RefreshCw, PlayCircle, Upload, X, Loader2 } from "lucide-react";
+import {
+  BookOpen,
+  Plus,
+  RefreshCw,
+  PlayCircle,
+  Upload,
+  X,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import { coursesAPI, mediaAPI } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -179,15 +187,20 @@ export default function AdminCoursesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold text-foreground">الكورسات</h1>
           <p className="text-muted-foreground mt-1">
             {isLoading ? "..." : `${courses.length} كورس`}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={fetchCourses} disabled={isLoading}>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={fetchCourses}
+            disabled={isLoading}
+            className="flex-1 sm:flex-none"
+          >
             <RefreshCw
               className={`w-4 h-4 ml-2 ${isLoading ? "animate-spin text-loading" : "text-muted-foreground"}`}
             />
@@ -197,7 +210,7 @@ export default function AdminCoursesPage() {
           {isTeacher && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                <Button className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Plus className="w-4 h-4 ml-2" />
                   كورس جديد
                 </Button>
@@ -314,7 +327,7 @@ export default function AdminCoursesPage() {
                             </div>
                           )}
                           {!isUploading && (
-                            <div className="absolute inset-x-0 bottom-0 flex justify-end gap-2 bg-gradient-to-t from-black/60 to-transparent p-2">
+                            <div className="absolute inset-x-0 bottom-0 flex justify-end gap-2 bg-linear-to-t from-black/60 to-transparent p-2">
                               <button
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}

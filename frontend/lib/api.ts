@@ -681,6 +681,8 @@ export const gamificationAPI = {
   getMe: () => request("/gamification/me"),
   // XP الطالب في كورس معيّن
   getMyCourseXp: (courseId: string) => request(`/gamification/me/course/${courseId}`),
+  // ترتيب الطالب وسط مرحلته
+  getMyRank: () => request("/gamification/me/rank"),
   // تحكّم الطالب في ظهوره في الترتيب
   setVisibility: (visible: boolean) =>
     request("/gamification/me/visibility", {

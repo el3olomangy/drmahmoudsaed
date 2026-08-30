@@ -10,6 +10,7 @@ import { BookOpen, PlayCircle, FileCheck, ArrowLeft, KeyRound } from "lucide-rea
 import { useAuth } from "@/context/AuthContext"
 import { coursesAPI, progressAPI } from "@/lib/api"
 import { getImageUrl } from "@/lib/utils/image"
+import { MyGradeLeaderboard } from "@/components/my-grade-leaderboard"
 
 interface Course {
   id: string
@@ -227,6 +228,9 @@ export default function DashboardPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* أوائل مرحلة الطالب */}
+      <MyGradeLeaderboard grade={user?.grade} myId={user?.id} />
     </div>
   )
 }

@@ -71,6 +71,47 @@ async def my_course_xp(course_id: str, current_user=Depends(get_current_user), d
     return {"course_id": course_id, "course_xp": course_xp}
 
 
+@router.get("/me/rank")
+async def my_rank(current_user=Depends(get_current_user), db=Depends(get_db)):
+    """ترتيب الطالب الحالي وسط طلاب نفس مرحلته (حسب الـ XP).
+
+    بيحسب الترتيب بين كل طلاب الصف اللي عندهم XP أكبر من صفر. لو الطالب لسه
+    مجمّعش XP، بيرجّع ranked=False. محصّن ضد الأخطاء (بيرجّع ranked=False لو حصل خطأ).
+    """
+    grade = current_user.get("grade")
+    my_xp = int(current_user.get("total_xp", 0) or 0)
+    lvl = compute_level(my_xp)
+
+    base = {
+        "grade": grade,
+        "total_xp": my_xp,
+        "level": lvl["level"],
+        "title": lvl["title"],
+    }
+
+    if not grade or my_xp <= 0:
+        return {"ranked": False, "rank": None, "total_ranked": 0, **base}
+
+    try:
+        students = await db.users.query({"grade": grade}).to_list(50000)
+    except Exception as e:
+        print(f"[my_rank] failed: {e}")
+        return {"ranked": False, "rank": None, "total_ranked": 0, **base}
+
+    peers = [
+        int(s.get("total_xp", 0) or 0)
+        for s in students
+        if s.get("role") == "student" and int(s.get("total_xp", 0) or 0) > 0
+    ]
+    higher = sum(1 for xp in peers if xp > my_xp)
+    return {
+        "ranked": True,
+        "rank": higher + 1,          # التعادل بياخد نفس المركز
+        "total_ranked": len(peers),
+        **base,
+    }
+
+
 class VisibilityUpdate(BaseModel):
     visible: bool
 
@@ -100,27 +141,40 @@ async def leaderboard(
 
     بتحترم خصوصية الطالب: اللي قافل ظهوره في الترتيب مايظهرش.
     فلترة اختيارية بالصف.
+
+    ملاحظة: لو حصل أي خطأ في القراءة، بترجّع قائمة فاضية (200) عشان
+    ماتكسرش الصفحة الرئيسية — الأخطاء بتتسجّل في لوج السيرفر.
     """
-    students = await db.users.query({"role": "student"}).to_list(50000)
+    try:
+        students = await db.users.query({"role": "student"}).to_list(50000)
+    except Exception as e:
+        print(f"[leaderboard] failed to load students: {e}")
+        return {"grade": grade, "count": 0, "students": []}
 
     ranked = []
     for s in students:
-        if s.get("leaderboard_visible", True) is False:
+        try:
+            if s.get("leaderboard_visible", True) is False:
+                continue
+            if int(s.get("total_xp", 0) or 0) <= 0:
+                continue
+            if grade and s.get("grade") != grade:
+                continue
+            ranked.append(s)
+        except Exception:
             continue
-        if int(s.get("total_xp", 0) or 0) <= 0:
-            continue
-        if grade and s.get("grade") != grade:
-            continue
-        ranked.append(s)
 
     ranked.sort(key=lambda u: int(u.get("total_xp", 0) or 0), reverse=True)
     ranked = ranked[:limit]
 
-    return {
-        "grade": grade,
-        "count": len(ranked),
-        "students": [_student_card(s, rank=i + 1) for i, s in enumerate(ranked)],
-    }
+    cards = []
+    for i, s in enumerate(ranked):
+        try:
+            cards.append(_student_card(s, rank=i + 1))
+        except Exception:
+            continue
+
+    return {"grade": grade, "count": len(cards), "students": cards}
 
 
 @router.get("/levels")

@@ -18,6 +18,7 @@ import {
 import { usersAPI } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { StudentDetailModal } from "@/components/students/StudentDetailModal";
+import { DefaultAvatar } from "@/components/default-avatar";
 
 interface Student {
   id: string;
@@ -322,10 +323,10 @@ export default function StudentsPage() {
               {filtered.map((student) => (
                 <div
                   key={student.id}
-                  className="p-4 flex items-center gap-4 hover:bg-muted/30 transition-colors cursor-pointer"
+                  className="p-4 flex flex-wrap items-center gap-3 sm:gap-4 hover:bg-muted/30 transition-colors cursor-pointer"
                   onClick={() => setSelectedStudentId(student.id)}
                 >
-                  <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center font-bold text-sm shrink-0 bg-primary/10 text-primary">
+                  <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
                     {student.avatar_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -334,10 +335,10 @@ export default function StudentsPage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <>
-                        {student.first_name[0]}
-                        {student.last_name[0]}
-                      </>
+                      <DefaultAvatar
+                        gender={student.gender}
+                        name={`${student.first_name} ${student.last_name}`}
+                      />
                     )}
                   </div>
 
@@ -365,6 +366,10 @@ export default function StudentsPage() {
                         </>
                       )}
                     </p>
+                    <p className="md:hidden text-xs text-muted-foreground mt-1">
+                      {gradeLabels[student.grade || ""] || student.grade || "—"} ·{" "}
+                      {student.enrolled_courses.length} كورس
+                    </p>
                   </div>
 
                   <div className="hidden md:block text-sm text-muted-foreground text-left shrink-0">
@@ -377,7 +382,7 @@ export default function StudentsPage() {
                   </div>
 
                   <div
-                    className="flex items-center gap-2 shrink-0"
+                    className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end order-last sm:order-none"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Button

@@ -2,20 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { gamificationAPI } from "@/lib/api"
-import { getImageUrl } from "@/lib/utils/image"
-import { Trophy, Crown, Medal, Loader2 } from "lucide-react"
-
-interface LbStudent {
-  id: string
-  name: string
-  avatar_url: string | null
-  default_avatar: string
-  grade: string | null
-  total_xp: number
-  level: number
-  title: string
-  rank: number
-}
+import { Trophy, Loader2 } from "lucide-react"
+import { LeaderboardList, type LbStudent } from "@/components/leaderboard-list"
 
 const GRADES: { value: string; label: string }[] = [
   { value: "", label: "كل الصفوف" },
@@ -26,21 +14,6 @@ const GRADES: { value: string; label: string }[] = [
   { value: "second_secondary", label: "تانية ثانوي" },
   { value: "third_secondary", label: "تالتة ثانوي" },
 ]
-
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/)
-  return ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).trim() || "؟"
-}
-
-function RankBadge({ rank }: { rank: number }) {
-  if (rank === 1)
-    return <Crown className="w-5 h-5 text-yellow-500" aria-label="الأول" />
-  if (rank === 2)
-    return <Medal className="w-5 h-5 text-slate-400" aria-label="الثاني" />
-  if (rank === 3)
-    return <Medal className="w-5 h-5 text-amber-700" aria-label="الثالث" />
-  return <span className="text-sm font-bold text-muted-foreground w-5 text-center">{rank}</span>
-}
 
 export function LeaderboardSection() {
   const [students, setStudents] = useState<LbStudent[]>([])
@@ -111,56 +84,7 @@ export function LeaderboardSection() {
               لسه مفيش طلاب في الترتيب — كن أول واحد! 🚀
             </div>
           ) : (
-            <ol className="space-y-2.5">
-              {students.map((s) => (
-                <li
-                  key={s.id}
-                  className={`flex items-center gap-3 rounded-2xl border p-3 bg-background transition-shadow hover:shadow-sm ${
-                    s.rank <= 3 ? "border-primary/30" : "border-border"
-                  }`}
-                >
-                  <div className="w-6 flex justify-center shrink-0">
-                    <RankBadge rank={s.rank} />
-                  </div>
-
-                  {/* الصورة أو الأفاتار الافتراضي */}
-                  <div
-                    className={`w-11 h-11 rounded-full overflow-hidden shrink-0 flex items-center justify-center text-sm font-bold ${
-                      s.default_avatar === "female"
-                        ? "bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-300"
-                        : "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300"
-                    }`}
-                  >
-                    {s.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={getImageUrl(s.avatar_url) || undefined}
-                        alt={s.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      initials(s.name)
-                    )}
-                  </div>
-
-                  {/* الاسم و Level */}
-                  <div className="min-w-0 flex-1">
-                    <p className="font-bold truncate">{s.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      Level {s.level} — {s.title}
-                    </p>
-                  </div>
-
-                  {/* XP */}
-                  <div className="shrink-0 text-left">
-                    <p className="font-extrabold text-primary leading-none">
-                      {s.total_xp.toLocaleString("en-US")}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground">XP</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
+            <LeaderboardList students={students} />
           )}
         </div>
       </div>

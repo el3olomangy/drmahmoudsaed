@@ -1,26 +1,51 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-	 width="800px" height="800px" viewBox="0 0 48.937 48.937"
-	 xml:space="preserve">
-<g>
-	<g>
-		<ellipse cx="24.521" cy="34.999" rx="2.5" ry="1"/>
-		<circle cx="17.729" cy="28.867" r="2.25"/>
-		<circle cx="31.313" cy="28.867" r="2.25"/>
-		<path d="M44.645,24.421c1.249-1.011,2.108-2.938,1.75-6.517c0,0-0.832-11.498-8.667-10.332c0,0-2.441-7.721-17.783-4.875
-			c-0.863-1.02-2.41-2.186-5.142-2.697c0,0,0.833,1.722,0.956,3.589C13.607,3.734,0.43,5.256,2.728,20.572
-			c0,0,0.214,2.983,1.667,4.493v3.217c-0.857,1.123-1.375,2.545-1.375,4.094c0,2.969,1.885,5.484,4.463,6.291
-			c3.261,6.242,9.805,10.271,17.068,10.271c7.269,0,13.821-4.041,17.08-10.295c2.54-0.832,4.389-3.327,4.389-6.271
-			c0-1.549-0.517-2.975-1.375-4.098L44.645,24.421L44.645,24.421z M39.78,34.937c-0.29,0-0.564-0.065-0.818-0.182
-			c-2.039,5.918-7.712,10.182-14.408,10.182c-6.703,0-12.383-4.272-14.415-10.2c-0.269,0.129-0.563,0.2-0.874,0.2
-			c-1.244,0-2.242-1.145-2.242-2.562c0-1.414,0.998-2.563,2.242-2.563c0.023,0,0.045,0.008,0.069,0.008
-			c0.004-0.582,0.046-1.266,0.117-1.985c1.521-0.433,3.223-2.115,4.326-4.48c0.33-0.708,0.575-1.417,0.745-2.103
-			c0.479,1.038,1.443,2.343,3.376,2.987c0,0-0.167-4.666,1.833-5.666c0,0,2.166,2.5,1.833,4c0,0,5.131-1.72,6.224-4.395
-			c-0.255,0.693-0.793,2.589,0.275,4.061c0,0,1.5-3.168,2.832-3.5c0,0,1.777,3.459,4.699,5.267c1.112,2.053,2.668,3.484,4.063,3.848
-			c0.067,0.713,0.108,1.387,0.112,1.961c0.005,0,0.007-0.002,0.009-0.002c1.243,0,2.24,1.148,2.24,2.564
-			C42.02,33.79,41.024,34.937,39.78,34.937z"/>
-	</g>
-</g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" role="img" aria-label="Boy avatar">
+  <defs>
+    <linearGradient id="bgBoy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8FB4FF"/>
+      <stop offset="1" stop-color="#3B62E0"/>
+    </linearGradient>
+    <linearGradient id="skinBoy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFDCBC"/>
+      <stop offset="1" stop-color="#EFB184"/>
+    </linearGradient>
+    <linearGradient id="hairBoy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5C4632"/>
+      <stop offset="1" stop-color="#33251A"/>
+    </linearGradient>
+    <linearGradient id="shirtBoy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F1F5FF"/>
+      <stop offset="1" stop-color="#BFD2FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" fill="url(#bgBoy)"/>
+  <ellipse cx="80" cy="150" rx="70" ry="40" fill="#000" opacity="0.06"/>
+  <!-- shoulders / shirt -->
+  <path d="M22 160 C22 120 48 106 80 106 C112 106 138 120 138 160 Z" fill="url(#shirtBoy)"/>
+  <path d="M80 106 l-10 14 10 10 10 -10 z" fill="#ffffff" opacity="0.7"/>
+  <!-- neck -->
+  <path d="M69 94 h22 v12 c0 9 -22 9 -22 0 z" fill="#E6AE80"/>
+  <!-- ears -->
+  <circle cx="47" cy="70" r="8" fill="url(#skinBoy)"/>
+  <circle cx="113" cy="70" r="8" fill="url(#skinBoy)"/>
+  <!-- head -->
+  <rect x="46" y="34" width="68" height="74" rx="34" fill="url(#skinBoy)"/>
+  <!-- hair -->
+  <path d="M45 72 C42 40 60 26 80 26 C100 26 118 40 115 72 C112 58 108 54 106 54 C100 46 92 48 80 48 C68 48 60 46 54 54 C52 54 48 58 45 72 Z" fill="url(#hairBoy)"/>
+  <!-- eyebrows -->
+  <rect x="59" y="63" width="15" height="3.5" rx="1.75" fill="#4A382A"/>
+  <rect x="86" y="63" width="15" height="3.5" rx="1.75" fill="#4A382A"/>
+  <!-- eyes -->
+  <circle cx="66" cy="74" r="4.6" fill="#3A2C22"/>
+  <circle cx="94" cy="74" r="4.6" fill="#3A2C22"/>
+  <circle cx="67.6" cy="72.4" r="1.5" fill="#fff"/>
+  <circle cx="95.6" cy="72.4" r="1.5" fill="#fff"/>
+  <!-- nose -->
+  <path d="M80 78 q3.5 6 -1 9.5" stroke="#DB9C6C" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <!-- mouth -->
+  <path d="M69 92 Q80 100 91 92" stroke="#BE6E50" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+  <!-- cheeks -->
+  <circle cx="59" cy="86" r="5.5" fill="#FF9E80" opacity="0.35"/>
+  <circle cx="101" cy="86" r="5.5" fill="#FF9E80" opacity="0.35"/>
+  <!-- head highlight -->
+  <ellipse cx="65" cy="55" rx="10" ry="7" fill="#fff" opacity="0.16"/>
 </svg>
