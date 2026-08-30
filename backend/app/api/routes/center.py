@@ -69,9 +69,23 @@ async def _is_paid(db, student_id: str, month: str) -> bool:
     return rec is not None
 
 
-async def _student_out(db, student: dict, month: Optional[str] = None) -> dict:
+async def _sessions_count(db, student_id: str, month: str) -> int:
+    """عدد الحصص (أيام الحضور) للطالب في شهر معيّن.
+
+    الحصة = يوم حضور واحد (تسجيل واحد لكل طالب في اليوم). العدّ بيتفلتر على
+    الشهر، فبالتالي مع بداية كل شهر جديد بيرجع صفر تلقائيًا من غير أي مسح،
+    والداتا القديمة بتفضل محفوظة للتقارير.
+    """
+    records = await db.center_attendance.query({"student_id": student_id}).to_list(20000)
+    return sum(1 for r in records if str(r.get("date", "")).startswith(month))
+
+
+async def _student_out(db, student: dict, month: Optional[str] = None,
+                       sessions: Optional[int] = None) -> dict:
     month = month or _current_month()
     paid = await _is_paid(db, str(student["_id"]), month)
+    if sessions is None:
+        sessions = await _sessions_count(db, str(student["_id"]), month)
     return {
         "id": str(student["_id"]),
         "name": student["name"],
@@ -82,6 +96,7 @@ async def _student_out(db, student: dict, month: Optional[str] = None) -> dict:
         "group_id": student["group_id"],
         "stage_id": student.get("stage_id"),
         "paid_current_month": paid,
+        "sessions_this_month": sessions,
         "current_month": month,
     }
 
@@ -225,6 +240,15 @@ async def all_students_for_offline(current_user=Depends(get_current_teacher_or_a
     """كل الطلاب مرة واحدة — عشان الموبايل يخزّنهم محليًا ويشتغل أوفلاين."""
     students = await db.center_students.query({}).to_list(20000)
     month = _current_month()
+
+    # حضور الشهر كله مرة واحدة ونعدّ حصص كل طالب
+    attendance = await db.center_attendance.query({}).to_list(200000)
+    counts: dict = {}
+    for a in attendance:
+        if str(a.get("date", "")).startswith(month):
+            sid = a["student_id"]
+            counts[sid] = counts.get(sid, 0) + 1
+
     out = []
     for s in students:
         paid = await _is_paid(db, str(s["_id"]), month)
@@ -237,6 +261,7 @@ async def all_students_for_offline(current_user=Depends(get_current_teacher_or_a
             "group_id": s["group_id"],
             "stage_id": s.get("stage_id"),
             "paid_current_month": paid,
+            "sessions_this_month": counts.get(str(s["_id"]), 0),
         })
     return {"month": month, "count": len(out), "students": out}
 
@@ -246,7 +271,17 @@ async def list_students(group_id: str, current_user=Depends(get_current_teacher_
     _oid(group_id, "المجموعة")
     students = await db.center_students.query({"group_id": group_id}).to_list(2000)
     month = _current_month()
-    out = [await _student_out(db, s, month) for s in students]
+
+    # نجيب حضور المجموعة كله مرة واحدة ونعدّ حصص كل طالب في الشهر الحالي
+    # بدل ما نعمل استعلام لكل طالب لوحده.
+    attendance = await db.center_attendance.query({"group_id": group_id}).to_list(50000)
+    counts: dict = {}
+    for a in attendance:
+        if str(a.get("date", "")).startswith(month):
+            sid = a["student_id"]
+            counts[sid] = counts.get(sid, 0) + 1
+
+    out = [await _student_out(db, s, month, counts.get(str(s["_id"]), 0)) for s in students]
     out.sort(key=lambda x: x["name"])
     return out
 
@@ -388,14 +423,17 @@ async def _do_scan(db, qr_token: str, recorded_by: str, date_str: str) -> dict:
 
     existing = await db.center_attendance.get_one({"student_id": student_id, "date": date_str})
     if existing:
-        return {"status": "already", "student": student_info, "date": date_str,
-                "message": "الطالب مسجّل حضور النهاردة خلاص"}
+        sessions = await _sessions_count(db, student_id, month)
+        return {"status": "already", "student": {**student_info, "sessions_this_month": sessions},
+                "date": date_str, "message": "الطالب مسجّل حضور النهاردة خلاص"}
 
     doc = attendance_doc(student_id, student["group_id"], student.get("stage_id"),
                          date_str, recorded_by, paid)
     await db.center_attendance.add(doc)
-    return {"status": "recorded", "student": student_info, "date": date_str,
-            "message": "تم تسجيل الحضور"}
+    # نعدّ الحصص بعد التسجيل عشان الرقم يشمل الحصة اللي لسه اتسجّلت
+    sessions = await _sessions_count(db, student_id, month)
+    return {"status": "recorded", "student": {**student_info, "sessions_this_month": sessions},
+            "date": date_str, "message": "تم تسجيل الحضور"}
 
 
 @router.post("/scan")
@@ -594,6 +632,91 @@ async def report_unpaid(
             })
     unpaid.sort(key=lambda x: x["name"])
     return {"month": month, "count": len(unpaid), "students": unpaid}
+
+
+@router.get("/reports/monthly")
+async def report_monthly(
+    stage_id: Optional[str] = Query(None),
+    group_id: Optional[str] = Query(None),
+    month: Optional[str] = Query(None),
+    current_user=Depends(get_current_teacher_or_assistant),
+    db=Depends(get_db),
+):
+    """تقرير الشهر: جدول واحد لكل طالب فيه عدد الحصص اللي حضرها الشهر ده
+    وحالة الدفع (دفع/مدفعش) — مع فلترة اختيارية بالمرحلة أو المجموعة.
+
+    ده اللي بيجمع في مكان واحد: حضور الطلاب في كل مجموعة خلال الشهر +
+    مين دفع ومين لسه ما دفعش.
+    """
+    month = month or _current_month()
+
+    # نطاق الطلاب
+    sfilters = {}
+    if group_id:
+        sfilters["group_id"] = group_id
+    elif stage_id:
+        sfilters["stage_id"] = stage_id
+    students = await db.center_students.query(sfilters).to_list(20000)
+
+    # حضور النطاق (كله) ونعدّ حصص الشهر لكل طالب
+    afilters = {}
+    if group_id:
+        afilters["group_id"] = group_id
+    elif stage_id:
+        afilters["stage_id"] = stage_id
+    attendance = await db.center_attendance.query(afilters).to_list(100000)
+    counts: dict = {}
+    for a in attendance:
+        if str(a.get("date", "")).startswith(month):
+            sid = a["student_id"]
+            counts[sid] = counts.get(sid, 0) + 1
+
+    # مدفوعات الشهر ده (استعلام واحد بالشهر) → خريطة student_id ← الدفعة
+    payments = await db.center_payments.query({"month": month}).to_list(100000)
+    paid_map = {p["student_id"]: p for p in payments}
+
+    # أسماء المجموعات (عشان نعرضها في الجدول ونرتّب بيها)
+    groups = await db.center_groups.query({}).to_list(5000)
+    group_name = {str(g["_id"]): g["name"] for g in groups}
+
+    rows = []
+    total_sessions = 0
+    paid_count = 0
+    total_collected = 0.0
+    for s in students:
+        sid = str(s["_id"])
+        sess = counts.get(sid, 0)
+        pay = paid_map.get(sid)
+        is_paid = pay is not None
+        amount = (pay.get("amount") or 0) if pay else 0
+        rows.append({
+            "student_id": sid,
+            "name": s["name"],
+            "student_number": s["student_number"],
+            "parent_phone": s["parent_phone"],
+            "group_id": s["group_id"],
+            "group_name": group_name.get(s["group_id"], "—"),
+            "monthly_fee": s["monthly_fee"],
+            "sessions": sess,
+            "paid": is_paid,
+            "amount_paid": amount,
+        })
+        total_sessions += sess
+        if is_paid:
+            paid_count += 1
+            total_collected += amount
+
+    rows.sort(key=lambda x: (x["group_name"], x["name"]))
+
+    return {
+        "month": month,
+        "students_count": len(rows),
+        "paid_count": paid_count,
+        "unpaid_count": len(rows) - paid_count,
+        "total_sessions": total_sessions,
+        "total_collected": total_collected,
+        "rows": rows,
+    }
 
 
 @router.get("/groups/{group_id}/summary")

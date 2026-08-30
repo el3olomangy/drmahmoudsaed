@@ -28,6 +28,7 @@ import {
   WifiOff,
   RefreshCw,
   CloudUpload,
+  CalendarCheck,
 } from "lucide-react";
 
 interface ScanStudent {
@@ -36,6 +37,7 @@ interface ScanStudent {
   student_number: string;
   parent_phone: string;
   paid_current_month: boolean;
+  sessions_this_month?: number;
 }
 interface ScanResult {
   status: "recorded" | "already" | "not_found" | "queued";
@@ -368,6 +370,11 @@ export default function ScanPage() {
               <span className="flex items-center gap-2">
                 <Hash className="w-3.5 h-3.5" /> رقم الطالب: {result.student.student_number}
               </span>
+              {typeof result.student.sessions_this_month === "number" && (
+                <span className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-medium">
+                  <CalendarCheck className="w-3.5 h-3.5" /> حضر {result.student.sessions_this_month} حصة الشهر ده
+                </span>
+              )}
               {!result.student.paid_current_month && (
                 <span className="flex items-center gap-2 text-destructive font-medium">
                   <Phone className="w-3.5 h-3.5" /> كلّم ولي الأمر: {result.student.parent_phone}

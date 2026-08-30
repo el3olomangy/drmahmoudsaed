@@ -28,6 +28,7 @@ import {
   Wallet,
   ArrowRight,
   BadgeDollarSign,
+  CalendarCheck,
 } from "lucide-react";
 
 interface Student {
@@ -39,6 +40,7 @@ interface Student {
   qr_token: string;
   group_id: string;
   paid_current_month: boolean;
+  sessions_this_month: number;
   current_month: string;
 }
 interface Summary {
@@ -284,6 +286,10 @@ export default function GroupStudentsPage({
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-bold text-lg truncate">{s.name}</p>
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 rounded-full px-2 py-0.5">
+                        <CalendarCheck className="w-3 h-3" />
+                        {s.sessions_this_month} حصة الشهر
+                      </span>
                       {s.paid_current_month ? (
                         <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded-full px-2 py-0.5">
                           <CheckCircle className="w-3 h-3" />
@@ -299,6 +305,9 @@ export default function GroupStudentsPage({
                     <div className="mt-2 grid gap-1 text-sm text-muted-foreground">
                       <span className="flex items-center gap-2">
                         <Hash className="w-3.5 h-3.5" /> رقم الطالب: {s.student_number}
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <CalendarCheck className="w-3.5 h-3.5" /> حضر {s.sessions_this_month} حصة خلال الشهر
                       </span>
                       <span className="flex items-center gap-2">
                         <Phone className="w-3.5 h-3.5" /> ولي الأمر: {s.parent_phone}

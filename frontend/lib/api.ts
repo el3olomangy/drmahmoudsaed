@@ -1049,6 +1049,10 @@ export const centerAPI = {
     const q = new URLSearchParams(params as Record<string, string>).toString()
     return request(`/center/reports/unpaid${q ? `?${q}` : ""}`)
   },
+  reportMonthly: (params?: { stage_id?: string; group_id?: string; month?: string }) => {
+    const q = new URLSearchParams(params as Record<string, string>).toString()
+    return request(`/center/reports/monthly${q ? `?${q}` : ""}`)
+  },
   groupSummary: (groupId: string) => request(`/center/groups/${groupId}/summary`),
 
   // ===== الحضور اليومي =====

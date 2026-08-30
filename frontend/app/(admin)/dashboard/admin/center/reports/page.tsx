@@ -16,6 +16,8 @@ import {
   CalendarCheck,
   Wallet,
   Users,
+  CalendarRange,
+  Printer,
 } from "lucide-react";
 
 interface Stage {
@@ -42,8 +44,29 @@ interface UnpaidStudent {
   group_id: string;
   monthly_fee: number;
 }
+interface MonthlyRow {
+  student_id: string;
+  name: string;
+  student_number: string;
+  parent_phone: string;
+  group_id: string;
+  group_name: string;
+  monthly_fee: number;
+  sessions: number;
+  paid: boolean;
+  amount_paid: number;
+}
+interface MonthlyData {
+  month: string;
+  students_count: number;
+  paid_count: number;
+  unpaid_count: number;
+  total_sessions: number;
+  total_collected: number;
+  rows: MonthlyRow[];
+}
 
-type Tab = "attendance" | "unpaid";
+type Tab = "monthly" | "attendance" | "unpaid";
 
 function todayStr() {
   const d = new Date();
@@ -58,7 +81,7 @@ function currentMonthStr() {
 }
 
 export default function CenterReportsPage() {
-  const [tab, setTab] = useState<Tab>("attendance");
+  const [tab, setTab] = useState<Tab>("monthly");
 
   // تاريخ الحضور + شهر المدفوعات
   const [date, setDate] = useState(todayStr());
@@ -73,6 +96,7 @@ export default function CenterReportsPage() {
   // بيانات
   const [attendance, setAttendance] = useState<{ date: string; present_count: number; present: PresentStudent[] } | null>(null);
   const [unpaid, setUnpaid] = useState<{ month: string; count: number; students: UnpaidStudent[] } | null>(null);
+  const [monthly, setMonthly] = useState<MonthlyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -102,8 +126,10 @@ export default function CenterReportsPage() {
     try {
       if (tab === "attendance") {
         setAttendance((await centerAPI.attendanceDay({ date, ...scope })) as any);
-      } else {
+      } else if (tab === "unpaid") {
         setUnpaid((await centerAPI.reportUnpaid({ month, ...scope })) as any);
+      } else {
+        setMonthly((await centerAPI.reportMonthly({ month, ...scope })) as any);
       }
     } catch (err: any) {
       setError(err.message || "حصل خطأ في تحميل التقرير");
@@ -133,6 +159,15 @@ export default function CenterReportsPage() {
 
       {/* التبويبات */}
       <div className="flex gap-2 p-1 bg-muted rounded-xl">
+        <button
+          onClick={() => setTab("monthly")}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            tab === "monthly" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground"
+          }`}
+        >
+          <CalendarRange className="w-4 h-4" />
+          تقرير الشهر
+        </button>
         <button
           onClick={() => setTab("attendance")}
           className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors ${
@@ -225,8 +260,19 @@ export default function CenterReportsPage() {
         </div>
       ) : tab === "attendance" ? (
         <AttendanceReport data={attendance} />
-      ) : (
+      ) : tab === "unpaid" ? (
         <UnpaidReport data={unpaid} />
+      ) : (
+        <MonthlyReport
+          data={monthly}
+          scopeName={
+            groupId
+              ? groups.find((g) => g.id === groupId)?.name || ""
+              : stageId
+              ? stages.find((s) => s.id === stageId)?.name || ""
+              : "كل المراحل"
+          }
+        />
       )}
     </div>
   );
@@ -281,6 +327,181 @@ function AttendanceReport({ data }: { data: { date: string; present_count: numbe
           </CardContent>
         </Card>
       ))}
+    </div>
+  );
+}
+
+function escapeHtml(s: string) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function printMonthly(data: MonthlyData, scopeName: string) {
+  const rowsHtml = data.rows
+    .map(
+      (r, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${escapeHtml(r.group_name)}</td>
+        <td class="name">${escapeHtml(r.name)}</td>
+        <td>${escapeHtml(r.student_number)}</td>
+        <td class="center">${r.sessions}</td>
+        <td class="center ${r.paid ? "paid" : "unpaid"}">${r.paid ? "دفع" : "مدفعش"}</td>
+      </tr>`
+    )
+    .join("");
+
+  const html = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8" />
+<title>تقرير الشهر ${escapeHtml(data.month)}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; padding: 24px; color: #111; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: #555; font-size: 13px; margin-bottom: 16px; }
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .stat { border: 1px solid #ddd; border-radius: 8px; padding: 8px 14px; font-size: 13px; }
+  .stat b { display: block; font-size: 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { border: 1px solid #ccc; padding: 7px 8px; text-align: right; }
+  th { background: #f3f4f6; font-weight: 700; }
+  td.center, th.center { text-align: center; }
+  td.name { font-weight: 600; }
+  td.paid { color: #15803d; font-weight: 700; }
+  td.unpaid { color: #b91c1c; font-weight: 700; }
+  tr:nth-child(even) td { background: #fafafa; }
+  @media print { body { padding: 0; } .noprint { display: none; } }
+</style>
+</head>
+<body>
+  <h1>تقرير الشهر — ${escapeHtml(data.month)}</h1>
+  <div class="sub">النطاق: ${escapeHtml(scopeName)} · اتطبع في ${new Date().toLocaleString("ar-EG")}</div>
+  <div class="stats">
+    <div class="stat">عدد الطلاب <b>${data.students_count}</b></div>
+    <div class="stat">إجمالي الحصص <b>${data.total_sessions}</b></div>
+    <div class="stat">دفعوا <b>${data.paid_count}</b></div>
+    <div class="stat">مدفعوش <b>${data.unpaid_count}</b></div>
+    <div class="stat">المحصّل <b>${data.total_collected} ج</b></div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>المجموعة</th>
+        <th>اسم الطالب</th>
+        <th>رقم الطالب</th>
+        <th class="center">عدد الحصص</th>
+        <th class="center">الدفع</th>
+      </tr>
+    </thead>
+    <tbody>${rowsHtml}</tbody>
+  </table>
+  <script>window.onload = function(){ window.print(); }</script>
+</body>
+</html>`;
+
+  const w = window.open("", "_blank");
+  if (!w) {
+    alert("الطباعة اتمنعت. اسمح للنوافذ المنبثقة (pop-ups) للموقع.");
+    return;
+  }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+
+function MonthlyReport({ data, scopeName }: { data: MonthlyData | null; scopeName: string }) {
+  if (!data) return null;
+  if (data.students_count === 0) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          <Users className="w-10 h-10 mx-auto mb-3 opacity-40" />
+          <p>مفيش طلاب في النطاق ده.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+  return (
+    <div className="space-y-4">
+      {/* ملخّص + زرار طباعة */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="rounded-xl bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-3 py-2 text-center">
+          <p className="text-xl font-extrabold">{data.total_sessions}</p>
+          <p className="text-[11px]">إجمالي الحصص</p>
+        </div>
+        <div className="rounded-xl bg-muted px-3 py-2 text-center">
+          <p className="text-xl font-extrabold">{data.students_count}</p>
+          <p className="text-[11px]">عدد الطلاب</p>
+        </div>
+        <div className="rounded-xl bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-3 py-2 text-center">
+          <p className="text-xl font-extrabold">{data.paid_count}</p>
+          <p className="text-[11px]">دفعوا</p>
+        </div>
+        <div className="rounded-xl bg-destructive/10 text-destructive px-3 py-2 text-center">
+          <p className="text-xl font-extrabold">{data.unpaid_count}</p>
+          <p className="text-[11px]">مدفعوش</p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <p className="text-sm text-muted-foreground">
+          المحصّل الشهر ده:{" "}
+          <span className="font-bold text-foreground">{data.total_collected} ج</span>
+        </p>
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => printMonthly(data, scopeName)}>
+          <Printer className="w-4 h-4" />
+          طباعة / PDF
+        </Button>
+      </div>
+
+      {/* الجدول */}
+      <Card>
+        <CardContent className="p-0 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-muted-foreground">
+                <th className="text-right font-medium px-3 py-2.5">المجموعة</th>
+                <th className="text-right font-medium px-3 py-2.5">الطالب</th>
+                <th className="text-center font-medium px-3 py-2.5 whitespace-nowrap">عدد الحصص</th>
+                <th className="text-center font-medium px-3 py-2.5">الدفع</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.rows.map((r) => (
+                <tr key={r.student_id} className="border-b border-border/60 last:border-0">
+                  <td className="px-3 py-2.5 text-muted-foreground whitespace-nowrap">{r.group_name}</td>
+                  <td className="px-3 py-2.5">
+                    <span className="font-semibold">{r.name}</span>
+                    <span className="block text-[11px] text-muted-foreground">{r.student_number}</span>
+                  </td>
+                  <td className="px-3 py-2.5 text-center">
+                    <span className="inline-flex items-center justify-center min-w-7 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold px-2 py-0.5">
+                      {r.sessions}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2.5 text-center">
+                    {r.paid ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400">
+                        <CheckCircle className="w-3.5 h-3.5" /> دفع
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
+                        <AlertCircle className="w-3.5 h-3.5" /> مدفعش
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
