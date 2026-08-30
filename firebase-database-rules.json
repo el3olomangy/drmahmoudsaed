@@ -2,7 +2,8 @@
   "rules": {
     ".read": false,
     ".write": false,
-    "users": { ".indexOn": ["phone", "parent_phone", "role", "grade", "created_at"] },
+    "users": { ".indexOn": ["phone", "parent_phone", "role", "grade", "created_at", "total_xp"] },
+    "xp_events": { ".indexOn": ["student_id", "dedup_key", "kind", "created_at"] },
     "courses": { ".indexOn": ["grade", "is_active", "created_at"] },
     "units": { ".indexOn": ["course_id", "order"] },
     "lectures": { ".indexOn": ["unit_id", "course_id", "order"] },

@@ -132,6 +132,29 @@ async def _store_exam_result(db, exam: dict, student_id: str, graded: dict, auto
     }
     await db.exam_results.add(result_doc)
 
+    # ===== XP: كويز محاضرة (فيه lecture_id) أو امتحان Final (من غير lecture_id) =====
+    try:
+        from ...core.gamification import (
+            award_or_topup_xp, maybe_award_unit_completion, quiz_xp, final_xp,
+        )
+        exam_id = str(exam["_id"])
+        score = graded.get("score", 0)
+        is_final = not exam.get("lecture_id")
+        meta = {
+            "course_id": exam.get("course_id"),
+            "unit_id": exam.get("unit_id"),
+            "lecture_id": exam.get("lecture_id"),
+            "title": exam.get("title"),
+            "score": score,
+        }
+        if is_final:
+            await award_or_topup_xp(db, student_id, "final_exam", f"final:{exam_id}", final_xp(score), meta)
+        else:
+            await award_or_topup_xp(db, student_id, "quiz", f"quiz:{exam_id}", quiz_xp(score), meta)
+            await maybe_award_unit_completion(db, student_id, exam.get("unit_id"), exam.get("course_id"))
+    except Exception:
+        pass
+
 
 async def finalize_attempt(db, exam: dict, attempt: dict, auto_submitted: bool = False) -> dict:
     """يسلّم جلسة امتحان: يصحّح المسودة، يخزّن النتيجة، ويقفل الجلسة.
@@ -658,6 +681,26 @@ async def submit_essay_review(data: ReviewSubmit, current_user=Depends(get_curre
             "reviewed_by": str(current_user["_id"]),
         }}
     )
+
+    # ===== XP: زوّد الفرق لو الدرجة زادت بعد تصحيح المقالي (ماينقصش أبدًا) =====
+    try:
+        from ...core.gamification import award_or_topup_xp, quiz_xp, final_xp
+        exam_id = str(exam["_id"])
+        student_id = result["student_id"]
+        is_final = not exam.get("lecture_id")
+        meta = {
+            "course_id": exam.get("course_id"),
+            "unit_id": exam.get("unit_id"),
+            "lecture_id": exam.get("lecture_id"),
+            "title": exam.get("title"),
+            "score": new_score,
+        }
+        if is_final:
+            await award_or_topup_xp(db, student_id, "final_exam", f"final:{exam_id}", final_xp(new_score), meta)
+        else:
+            await award_or_topup_xp(db, student_id, "quiz", f"quiz:{exam_id}", quiz_xp(new_score), meta)
+    except Exception:
+        pass
 
     if fully_reviewed:
         await db.notifications.add({

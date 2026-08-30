@@ -673,6 +673,33 @@ export const progressAPI = {
 }
 
 // ============================================================
+// GAMIFICATION (XP + Levels + Leaderboard)
+// ============================================================
+
+export const gamificationAPI = {
+  // بروفايل الطالب الحالي (Level / Title / XP / التقدّم)
+  getMe: () => request("/gamification/me"),
+  // XP الطالب في كورس معيّن
+  getMyCourseXp: (courseId: string) => request(`/gamification/me/course/${courseId}`),
+  // تحكّم الطالب في ظهوره في الترتيب
+  setVisibility: (visible: boolean) =>
+    request("/gamification/me/visibility", {
+      method: "PATCH",
+      body: JSON.stringify({ visible }),
+    }),
+  // لوحة المتصدرين (عامة — تشتغل من غير تسجيل دخول)
+  getLeaderboard: (params?: { grade?: string; limit?: number }) => {
+    const q = new URLSearchParams(
+      Object.entries(params || {})
+        .filter(([, v]) => v !== undefined && v !== "")
+        .map(([k, v]) => [k, String(v)])
+    ).toString()
+    return request(`/gamification/leaderboard${q ? `?${q}` : ""}`)
+  },
+  getLevels: () => request("/gamification/levels"),
+}
+
+// ============================================================
 // STATS
 // ============================================================
 

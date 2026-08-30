@@ -10,7 +10,7 @@ from .core.database import connect_db, close_db
 from .core.config import settings
 from .core.ratelimit import limiter
 from .core.scheduler import run_assignment_deadline_checker
-from .api.routes import auth, courses, codes, exams, notifications, users, progress, upload, stats, assignments, grade_images, homework, media, center, cron
+from .api.routes import auth, courses, codes, exams, notifications, users, progress, upload, stats, assignments, grade_images, homework, media, center, cron, gamification
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -94,6 +94,7 @@ app.include_router(media.router, prefix="/api/v1")
 app.include_router(media.webhook_router, prefix="/api/v1")
 app.include_router(center.router, prefix="/api/v1")
 app.include_router(cron.router, prefix="/api/v1")
+app.include_router(gamification.router, prefix="/api/v1")
 
 
 @app.get("/")

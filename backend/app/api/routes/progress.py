@@ -61,6 +61,7 @@ async def save_video_position(
     )
 
     # سجّل النشاط لو الطالب خلّص المحاضرة لأول مرة
+    xp_info = None
     if watched and not was_watched_before:
         lecture = await db.lectures.get_one({"_id": lecture_id}) if is_valid_id(lecture_id) else None
         lecture_title = lecture.get("title", "محاضرة") if lecture else "محاضرة"
@@ -70,7 +71,26 @@ async def save_video_position(
             "message": f"أتم مشاهدة محاضرة: {lecture_title}",
         })
 
-    return {"message": "تم حفظ الموقف"}
+        # +XP على إكمال المحاضرة (مرة واحدة) + فحص إكمال الـ Unit
+        try:
+            from ...core.gamification import award_xp, maybe_award_unit_completion, XP
+            course_id = lecture.get("course_id") if lecture else None
+            unit_id = lecture.get("unit_id") if lecture else None
+            xp_info = await award_xp(
+                db, user_id, "lecture_watched", f"lecture:{lecture_id}",
+                XP["lecture_watched"],
+                {"course_id": course_id, "unit_id": unit_id, "title": lecture_title},
+            )
+            unit_bonus = await maybe_award_unit_completion(db, user_id, unit_id, course_id)
+            if unit_bonus and unit_bonus.get("awarded"):
+                xp_info = {**(xp_info or {}), "unit_bonus": unit_bonus}
+        except Exception:
+            pass
+
+    resp = {"message": "تم حفظ الموقف"}
+    if xp_info and xp_info.get("awarded"):
+        resp["xp"] = xp_info
+    return resp
 
 
 @router.get("/lecture/{lecture_id}/position")

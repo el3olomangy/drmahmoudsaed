@@ -142,6 +142,27 @@ async def _store_homework_result(db, hw: dict, student_id: str, graded: dict, au
     }
     await db.homework_results.add(result_doc)
 
+    # ===== XP: تسليم الواجب الأوتوماتيك (+ بونس حسب الدرجة) + فحص إكمال الـ Unit =====
+    try:
+        from ...core.gamification import (
+            award_or_topup_xp, maybe_award_unit_completion, homework_xp,
+        )
+        hw_id = str(hw["_id"])
+        score = graded.get("score", 0)
+        await award_or_topup_xp(
+            db, student_id, "homework", f"homework:{hw_id}", homework_xp(score),
+            {
+                "course_id": hw.get("course_id"),
+                "unit_id": hw.get("unit_id"),
+                "lecture_id": hw.get("lecture_id"),
+                "title": hw.get("title"),
+                "score": score,
+            },
+        )
+        await maybe_award_unit_completion(db, student_id, hw.get("unit_id"), hw.get("course_id"))
+    except Exception:
+        pass
+
 
 async def finalize_homework_attempt(db, hw: dict, attempt: dict, auto_submitted: bool = False) -> dict:
     """يسلّم جلسة واجب: يصحّح المسودة، يخزّن النتيجة، ويقفل الجلسة. آمن ضد التكرار."""
@@ -618,6 +639,23 @@ async def submit_homework_essay_review(data: HReviewSubmit, current_user=Depends
             "reviewed_by": str(current_user["_id"]),
         }}
     )
+
+    # ===== XP: زوّد الفرق لو الدرجة زادت بعد تصحيح المقالي (ماينقصش) =====
+    try:
+        from ...core.gamification import award_or_topup_xp, homework_xp
+        await award_or_topup_xp(
+            db, result["student_id"], "homework", f"homework:{str(hw['_id'])}",
+            homework_xp(new_score),
+            {
+                "course_id": hw.get("course_id"),
+                "unit_id": hw.get("unit_id"),
+                "lecture_id": hw.get("lecture_id"),
+                "title": hw.get("title"),
+                "score": new_score,
+            },
+        )
+    except Exception:
+        pass
 
     if fully_reviewed:
         await db.notifications.add({

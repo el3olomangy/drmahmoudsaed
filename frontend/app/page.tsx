@@ -2,6 +2,7 @@ import { Navbar } from "@/components/navbar"
 import { HeroSection } from "@/components/hero-section"
 import { FeaturesSection } from "@/components/features-section"
 import { GradesSection } from "@/components/grades-section"
+import { LeaderboardSection } from "@/components/leaderboard-section"
 import { Footer } from "@/components/footer"
 
 export default function HomePage() {
@@ -11,6 +12,7 @@ export default function HomePage() {
       <HeroSection />
       <FeaturesSection />
       <GradesSection />
+      <LeaderboardSection />
       <Footer />
     </main>
   )

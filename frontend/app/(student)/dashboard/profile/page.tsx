@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { usersAPI, progressAPI, authAPI, coursesAPI } from "@/lib/api"
+import { GamificationCard } from "@/components/gamification-card"
 
 const AVATAR_ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"]
 const AVATAR_MAX_SIZE_MB = 8
@@ -266,6 +267,9 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+
+      {/* ====== Gamification (Level / XP) ====== */}
+      <GamificationCard />
 
       {/* ====== Profile Info ====== */}
       <Card>

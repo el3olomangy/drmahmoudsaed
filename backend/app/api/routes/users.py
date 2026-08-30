@@ -31,6 +31,8 @@ def user_helper(user) -> dict:
         "is_active": user.get("is_active", True),
         "enrolled_courses": user.get("enrolled_courses", []),
         "avatar_url": user.get("avatar_url"),
+        "total_xp": int(user.get("total_xp", 0) or 0),
+        "leaderboard_visible": user.get("leaderboard_visible", True) is not False,
         # device_id و password و avatar_path مش بيتبعتوا أبداً
     }
 
